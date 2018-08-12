@@ -10,8 +10,11 @@
 #define linked_list_h
 
 typedef struct _Tree_node {
-    int frequenct;
+    int frequency;
     int val;
+    int position;
+    int depth;
+    char code[16];
     struct _Tree_node *left;
     struct _Tree_node *right;
 } Tree_node;

@@ -9,18 +9,21 @@
 #include "linked_list.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 
 list_node *list_insert_node(list_node *head, int name, int frequency, Tree_node *tree_node) {
     if (!head -> frequency) {
         head -> name = name;
         head -> frequency = frequency;
         head -> next = NULL;
+        head -> tree_node = tree_node;
         return head;
     }
-    
     list_node *temp = head;
-    list_node *new_node = malloc(sizeof(list_node*));
+    list_node *new_node = malloc(sizeof(list_node));
+    assert(new_node);
     new_node -> name = name;
+//    printf("name is %d\n", name);
     new_node -> frequency = frequency;
     new_node -> tree_node = tree_node;
     new_node -> next = NULL;
