@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include "huffman.h"
 
 list_node *list_insert_node(list_node *head, int name, int frequency, Tree_node *tree_node) {
     if (!head -> frequency) {
