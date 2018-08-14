@@ -30,17 +30,22 @@ struct code_information {
     Tree_node* code;
 };
 
+typedef struct {
+    int length;
+    char bitarray[1020];
+} Header;
+
 Tree_node *construct_huffman(list_node *head);
 
 void add_bit(char* bittarray, int k);
-void DFS(Tree_node *root, struct code_information* code_list, int *total_bit);
+void DFS(Tree_node *root, struct code_information* code_list, int *total_bit, Header *header);
 void char_print(char* a, int k);
 int check_target_binary(char *a, int k);
 
 
 int main(int argc, const char * argv[]) {
     
-    const char file_pwd[] = "/Users/wujian/Downloads/CSE_Course/18s2/COMP9319/assignment_1/assignment_1/test1.txt";
+    const char file_pwd[] = "/Users/wujian/Downloads/CSE_Course/18s2/COMP9319/assignment_1/assignment_1/test2.txt";
 //    const char file_pwd[] = "/import/adams/3/z5103624/COMP9319/assignment1/test1.txt";
     FILE *file = fopen(file_pwd, "r");
     int get_result;
@@ -74,11 +79,18 @@ int main(int argc, const char * argv[]) {
     // construct huffman tree
     Tree_node *root = construct_huffman(head);
 
+    // with pointer points the corresponding tree node
     struct code_information* code_list = malloc(128 * sizeof(struct code_information));
     memset(code_list, 0, 128 * sizeof(struct code_information));
 
-    int total_bit = 0;
-    DFS(root, code_list, &total_bit);
+    int total_bit = 0;  // the number of encode bit
+
+    // header with 1024 bytes
+    Header header;
+    header.length = 0;
+    memset(header.bitarray, 0, 1020);
+
+    DFS(root, code_list, &total_bit, &header);
     printf("\n");
 
     for (i = 0; i < 128; i++) {
@@ -132,11 +144,10 @@ int main(int argc, const char * argv[]) {
     file = fopen("/Users/wujian/Downloads/CSE_Course/18s2/COMP9319/assignment_1/assignment_1/output.huffman", "wb");
     fwrite(encode_result, sizeof(char), number_of_bytes_needed, file);
     fclose(file);
-    
-    
-    
-    
-    
+
+    file = fopen("/Users/wujian/Downloads/CSE_Course/18s2/COMP9319/assignment_1/assignment_1/header.test", "wb");
+    fwrite(&header, sizeof(Header), 1, file);
+    fclose(file);
     return 0;
 }
 
@@ -144,22 +155,31 @@ int main(int argc, const char * argv[]) {
 
 
 
-void DFS(Tree_node *root, struct code_information* code_list, int *total_bit) {
+void DFS(Tree_node *root, struct code_information* code_list, int *total_bit, Header *header) {
     // reach leaf node
     if ((!root -> left) && (!root -> right)) {
         // printf("%c: %d\n", root -> val, root -> code[0]);
-        printf("\n%d: depth is %d, frequency is %d, code is ",root -> val, root -> depth, root -> frequency);
-        char_print(&(root -> code[0]), 0);
-        printf("\n");
+//        printf("\n%d: depth is %d, frequency is %d, code is ",root -> val, root -> depth, root -> frequency);
+//        char_print(&(root -> code[0]), 0);
+//        printf("\n");
         code_list[root -> val].exist_or_not = 1;
         code_list[root -> val].code = root;
         *total_bit = *total_bit + (root -> frequency) * (root -> depth);
 //        printf("total bit: %d\n", *total_bit);
+        printf("1 %d ", root -> val);
+        header -> bitarray[header -> length] = 1;
+        header -> bitarray[header -> length + 1] = root -> val;
+        header -> length = header -> length + 2;
+
         return;
     }
     
     if (root -> left) {
+
         printf("0 ");
+        header -> bitarray[header -> length] = 0;
+        header -> length++;
+
         root -> left -> depth = root -> depth + 1;
         
         int i;
@@ -167,12 +187,15 @@ void DFS(Tree_node *root, struct code_information* code_list, int *total_bit) {
             root -> left -> code[i] = root -> code[i];
         }
         
-        DFS(root -> left, code_list, total_bit);
+        DFS(root -> left, code_list, total_bit, header);
     }
     
-    printf("-1 ");
+    // printf("-1 ");
     if (root -> right) {
-         printf("1 ");
+        printf("0 ");
+        header -> bitarray[header -> length] = 0;
+        header -> length++;
+
         root -> right -> depth = root -> depth + 1;
         int i;
         for (i = 0; i < 16; i++) {
@@ -181,9 +204,9 @@ void DFS(Tree_node *root, struct code_information* code_list, int *total_bit) {
         add_bit(root -> right -> code, root -> depth);
 //        char_print(&(root -> code[0]));
 
-        DFS(root -> right, code_list, total_bit);
+        DFS(root -> right, code_list, total_bit, header);
     }
-     printf("-1 ");
+    //  printf("-1 ");
 
     
 }
