@@ -6,6 +6,11 @@
 //  Copyright © 2018 Wujian. All rights reserved.
 //
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
 
 #ifndef huffman_h
 #define huffman_h
@@ -20,6 +25,41 @@ typedef struct _Tree_node {
     struct _Tree_node *right;
 } Tree_node;
 
+typedef struct _list_node {
+    int name;
+    int frequency;
+    Tree_node *tree_node;
+    struct _list_node *next;
+} list_node;
 
+struct code_information {
+    int exist_or_not;
+    Tree_node* code;
+};
+
+typedef struct {
+    int length;
+    int number_of_bits;
+    char bitarray[1016];
+} Header;
+
+
+// huffman tree functions
+Tree_node* Tree_node_init(Tree_node* new, int val, int frequency);
+
+list_node *construct_linked_list(int *frequence);
+
+Tree_node *construct_huffman(list_node *head);
+void DFS(Tree_node *root, struct code_information* code_list, int *total_bit, Header *header);
+
+// bit operations
+void add_bit(char* bittarray, int k);
+void char_print(char* a, int k);
+int check_target_binary(char *a, int k);  
+
+// linked list functions
+list_node *list_insert_node(list_node *head, int name, int frequency, Tree_node *tree_node);
+void list_print(list_node *head);
+void list_clean(list_node *head);
 
 #endif /* huffman_h */
