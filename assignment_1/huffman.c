@@ -13,6 +13,7 @@ Tree_node* Tree_node_init(Tree_node* new, int val, int frequency) {
     new -> frequency = frequency;
     new -> left = NULL;
     new -> right = NULL;
+    new -> parent = NULL;
     new -> depth = 0;
     memset(new -> code, 0, 16);
     new -> position = 0;
@@ -43,7 +44,7 @@ Tree_node *construct_huffman(list_node *head) {
     tree_node_temp = Tree_node_init(tree_node_temp, -1, 0);
     Tree_node *root = tree_node_temp;
     while (list_temp_head) {
-        printf("list frequency name is %d, value is %d\n",list_temp_head -> name, list_temp_head ->frequency);
+        // printf("list frequency name is %d, value is %d\n",list_temp_head -> name, list_temp_head ->frequency);
         
         if (!tree_node_temp -> left) {
             tree_node_temp -> left = list_temp_head -> tree_node;
@@ -113,6 +114,16 @@ void DFS(Tree_node *root, struct code_information* code_list, int *total_bit, He
         DFS(root -> right, code_list, total_bit, header);
     }
     //  printf("-1 ");
+}
+
+Tree_node *back_trace(Tree_node *node) {
+    while (node -> parent) {
+        node = node -> parent;
+        if (!node -> right) {
+            break;
+        }
+    }
+    return node;
 }
 
 

@@ -11,7 +11,6 @@
 #include <string.h>
 #include <assert.h>
 
-
 #ifndef huffman_h
 #define huffman_h
 
@@ -23,6 +22,7 @@ typedef struct _Tree_node {
     char code[16];
     struct _Tree_node *left;
     struct _Tree_node *right;
+    struct _Tree_node *parent;
 } Tree_node;
 
 typedef struct _list_node {
@@ -38,8 +38,8 @@ struct code_information {
 };
 
 typedef struct {
-    int length;
-    int number_of_bits;
+    int length;          // the number of bytes in header's bitarray
+    int number_of_bits;  // the number of encode bits
     char bitarray[1016];
 } Header;
 
@@ -51,6 +51,8 @@ list_node *construct_linked_list(int *frequence);
 
 Tree_node *construct_huffman(list_node *head);
 void DFS(Tree_node *root, struct code_information* code_list, int *total_bit, Header *header);
+
+Tree_node *back_trace(Tree_node *node);
 
 // bit operations
 void add_bit(char* bittarray, int k);
