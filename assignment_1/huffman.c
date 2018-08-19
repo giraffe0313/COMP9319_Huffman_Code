@@ -118,6 +118,8 @@ void DFS(Tree_node *root, struct code_information* code_list, int *total_bit, He
     //  printf("-1 ");
 }
 
+
+
 Tree_node *back_trace(Tree_node *node) {
     while (node -> parent) {
         node = node -> parent;

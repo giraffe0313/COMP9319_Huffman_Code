@@ -9,17 +9,46 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-// #include "linked_list.h"
+#include <unistd.h>
 #include "huffman.h"
 
 #define TRUE 1     
 #define FALSE 0
 
+void encode_function(const char* input_file, const char* output_file);
+void decode_function(const char* input_file, const char* output_file);
+void search_function(const char* pattern, const char* input_file);
+
 int main(int argc, const char * argv[]) {
-    
-    const char file_pwd[] = "/Users/wujian/Downloads/CSE_Course/18s2/COMP9319/assignment_1/assignment_1/test3.txt";
+    int c;
+
+    while ((c = getopt(argc, argv, "e:d:s:")) != -1) {
+        switch (c) {
+            case 'e':
+                encode_function(argv[2], argv[3]);
+                break;
+            case 'd':
+                // printf("find is d, argv is %s\n", optarg);
+                decode_function(argv[2], argv[3]);
+                break;
+            case 's':
+                // printf("find is s, argv is %s and %s\n", argv[2], argv[3]);
+                search_function(argv[2], argv[3]);
+                break;
+            default: printf("input errot!\n");
+        }
+    }
+
+}
+
+
+
+
+void encode_function(const char* input_file, const char* output_file) {
+        
+    // const char file_pwd[] = "/Users/wujian/Downloads/CSE_Course/18s2/COMP9319/assignment_1/assignment_1/test3.txt";
 //    const char file_pwd[] = "/import/adams/3/z5103624/COMP9319/assignment1/test1.txt";
-    FILE *file = fopen(file_pwd, "r");
+    FILE *file = fopen(input_file, "r");
     int get_result;
     int distinct_num = 0;
     int frequence[127] = {0};
@@ -82,7 +111,7 @@ int main(int argc, const char * argv[]) {
 
     char *encode_result = malloc(number_of_bytes_needed * sizeof(char));
     
-    file = fopen(file_pwd, "r");
+    file = fopen(input_file, "r");
     
     int total_number = 0;
     while ((get_result = fgetc(file)) != EOF) {
@@ -118,11 +147,11 @@ int main(int argc, const char * argv[]) {
     
     
 
-    file = fopen("/Users/wujian/Downloads/CSE_Course/18s2/COMP9319/assignment_1/assignment_1/output.file", "wb");
+    file = fopen(output_file, "wb");
     fwrite(&header, sizeof(Header), 1, file);
     fclose(file);
 
-    file = fopen("/Users/wujian/Downloads/CSE_Course/18s2/COMP9319/assignment_1/assignment_1/output.file", "a+");
+    file = fopen(output_file, "a+");
     fseek(file, 0, SEEK_END);
     fwrite(encode_result, sizeof(char), number_of_bytes_needed, file);
     fclose(file);
@@ -131,15 +160,16 @@ int main(int argc, const char * argv[]) {
     // file = fopen("/Users/wujian/Downloads/CSE_Course/18s2/COMP9319/assignment_1/assignment_1/output.file", "wb");
     // fwrite(&output_file, sizeof(Header) + number_of_bytes_needed * sizeof(char), 1, file);
     printf("\n\n\n");
+}
 
 
 
-
+void decode_function(const char* input_file, const char* output_file) {
     /* 
     * start decode
     */
 
-    file = fopen("/Users/wujian/Downloads/CSE_Course/18s2/COMP9319/assignment_1/assignment_1/output.file", "r");
+    FILE *file = fopen(input_file, "r");
     int input[2] = {0};
     fread(input, sizeof(int), 2, file);
     printf("Decode: input int 1 is %d, input int 2 is %d\n", input[0], input[1]);
@@ -192,15 +222,15 @@ int main(int argc, const char * argv[]) {
         printf("bug!!!!!!\n");
     } 
 
-    printf("Decode: recovery result is: \n");
-    DFS(recover_root, code_list, &total_bit, &header);
-    printf("\n");
+    // printf("Decode: recovery result is: \n");
+    // DFS(recover_root, code_list, &total_bit, &header);
+    // printf("\n");
 
     
 
     /* decode */
-    FILE *file_recovery = fopen("/Users/wujian/Downloads/CSE_Course/18s2/COMP9319/assignment_1/assignment_1/recover.txt", "w");
-    
+    FILE *file_recovery = fopen(output_file, "w");
+    int get_result;
 
     int number_of_bits = input[1];
     int bit_index = 0;
@@ -232,31 +262,76 @@ int main(int argc, const char * argv[]) {
         number_of_bits = number_of_bits - 8;
     }
     printf("\n");
+}
+
+
+void search_function(const char* pattern, const char* input_file) {
+    FILE *file = fopen(input_file, "r");
+    int input[2] = {0};
+    fread(input, sizeof(int), 2, file);
+    printf("Decode: input int 1 is %d, input int 2 is %d\n", input[0], input[1]);
     
+    // int header_need_bytes = input[0] / 8 + 1;
+    char *header_information = malloc(input[0] * sizeof(char));
+    memset(header_information, 0, input[0] * sizeof(char));
+    fread(header_information, sizeof(char), input[0], file);
+    
+    // create tree root
+    Tree_node *recover_root = malloc(sizeof(Tree_node));
+    Tree_node_init(recover_root, -1, 0);
+    Tree_node *temp_root = recover_root;
+
+    int interator = 0;
+    int should_be_right = FALSE; 
+    
+    // input[0] is header length of bytes, input[1] is encode length of bits;
+    
+    printf("Decode: construct tree: \n");
+    while (interator < input[0]) {
+        Tree_node *new_node = malloc(sizeof(Tree_node));
+        if (header_information[interator] == 0 && header_information[interator+1] == 1) {
+            Tree_node_init(new_node, header_information[interator+2], 0);
+            printf("node is %d\n", header_information[interator+2]);
+            if (should_be_right) {
+                temp_root -> right = new_node;
+            } else {
+                temp_root -> left = new_node;
+            }
+            new_node -> parent = temp_root;
+            temp_root = new_node;
+            temp_root = back_trace(temp_root);
+            should_be_right = TRUE;
+            interator = interator + 3;
+        } else {
+            Tree_node_init(new_node, -1, 0);
+            if (should_be_right) {
+                temp_root -> right = new_node;
+            } else {
+                temp_root -> left = new_node;
+            }
+            new_node -> parent = temp_root;
+            should_be_right = FALSE;
+            temp_root = new_node;
+            interator++;
+        }
+    }
+    if (temp_root != recover_root) {
+        printf("bug!!!!!!\n");
+    } 
 
     /* get next char */
     fseek(file, 1024, SEEK_SET);
 
-//    int number_of_bits = input[1];
-//    int bit_index = 1;
-//    int loop_indicator = 0;
-//    char recover_char;
-    
 
-    number_of_bits = input[1];
-    bit_index = 1;
-    loop_indicator = 0;
-    recover_char = 0;
-    get_result = 0;
+    int number_of_bits = input[1];
+    int bit_index = 1;
+    int loop_indicator = 0;
+    char recover_char = 0;
+    int get_result = 0;
 
-    // while (get_one_decode_result(file, &number_of_bits, &bit_index, &loop_indicator, &get_result, recover_root) != -1) {
-    //     printf("number_of_bits is %d, bit_index is %d, loop_indicator is %d\n", number_of_bits, bit_index, loop_indicator);
-    //     printf("\n");
-    // }
-    
     /* search */
     printf("\nstart search: \n");
-    char pattern[] = "baba";
+    // char pattern[] = "baba";
 
     int n = strlen(pattern);
     int *prefix = malloc(n * sizeof(int));
@@ -289,17 +364,4 @@ int main(int argc, const char * argv[]) {
         }
     }
     printf("match result is %d\n", match_number);
-
-
-
-    return 0;
 }
-
-
-
-
-
-
-
-
-

@@ -51,6 +51,7 @@ list_node *construct_linked_list(int *frequence);
 
 Tree_node *construct_huffman(list_node *head);
 void DFS(Tree_node *root, struct code_information* code_list, int *total_bit, Header *header);
+// void DFS_for_decode(Tree_node *root);
 
 Tree_node *back_trace(Tree_node *node);
 
