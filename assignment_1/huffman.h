@@ -64,4 +64,10 @@ list_node *list_insert_node(list_node *head, int name, int frequency, Tree_node 
 void list_print(list_node *head);
 void list_clean(list_node *head);
 
+// decode function
+int get_one_decode_result(FILE* file, int *number_of_bits, int *bit_index, int *loop_indicator, int *get_result, Tree_node *recover_root);
+
+// kmp function
+void prefix_table(char pattern[], int prefix[], int n);
+
 #endif /* huffman_h */

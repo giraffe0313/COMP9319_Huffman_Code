@@ -17,7 +17,7 @@
 
 int main(int argc, const char * argv[]) {
     
-    const char file_pwd[] = "/Users/wujian/Downloads/CSE_Course/18s2/COMP9319/assignment_1/assignment_1/test2.txt";
+    const char file_pwd[] = "/Users/wujian/Downloads/CSE_Course/18s2/COMP9319/assignment_1/assignment_1/test3.txt";
 //    const char file_pwd[] = "/import/adams/3/z5103624/COMP9319/assignment1/test1.txt";
     FILE *file = fopen(file_pwd, "r");
     int get_result;
@@ -205,7 +205,7 @@ int main(int argc, const char * argv[]) {
     int number_of_bits = input[1];
     int bit_index = 0;
     int loop_indicator;
-    char recover_char;
+    char recover_char = '\0';
     temp_root = recover_root;
     fseek(file, 1024, SEEK_SET);
     printf("Decode: recover code result:\n");
@@ -233,9 +233,62 @@ int main(int argc, const char * argv[]) {
     }
     printf("\n");
     
+
+    /* get next char */
+    fseek(file, 1024, SEEK_SET);
+
+//    int number_of_bits = input[1];
+//    int bit_index = 1;
+//    int loop_indicator = 0;
+//    char recover_char;
     
+
+    number_of_bits = input[1];
+    bit_index = 1;
+    loop_indicator = 0;
+    recover_char = 0;
+    get_result = 0;
+
+    // while (get_one_decode_result(file, &number_of_bits, &bit_index, &loop_indicator, &get_result, recover_root) != -1) {
+    //     printf("number_of_bits is %d, bit_index is %d, loop_indicator is %d\n", number_of_bits, bit_index, loop_indicator);
+    //     printf("\n");
+    // }
     
-    
+    /* search */
+    printf("\nstart search: \n");
+    char pattern[] = "baba";
+
+    int n = strlen(pattern);
+    int *prefix = malloc(n * sizeof(int));
+    prefix_table(pattern, prefix, n);
+    // int m = strlen(text);
+
+    int j = 0;
+    int match_number = 0;
+    int result = get_one_decode_result(file, &number_of_bits, &bit_index, &loop_indicator, &get_result, recover_root);
+    while (result != -1) {
+        if (j == n - 1  && ((char) result == pattern[j])) {
+            match_number++;
+            j = prefix[j];
+            if (j < 0) {
+                j++;
+                result = get_one_decode_result(file, &number_of_bits, &bit_index, &loop_indicator, &get_result, recover_root);
+            }
+            continue;
+        }
+        // printf("i = %d, j = %d\n", i, j);
+        if ((char) result == pattern[j]) {
+            j++;
+            result = get_one_decode_result(file, &number_of_bits, &bit_index, &loop_indicator, &get_result, recover_root);
+        } else {
+            j = prefix[j];
+            if (j < 0) {
+                j++;
+                result = get_one_decode_result(file, &number_of_bits, &bit_index, &loop_indicator, &get_result, recover_root);
+            }
+        }
+    }
+    printf("match result is %d\n", match_number);
 
 
 

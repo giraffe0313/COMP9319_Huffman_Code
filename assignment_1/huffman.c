@@ -7,6 +7,8 @@
 //
 
 #include "huffman.h"
+#define TRUE 1     
+#define FALSE 0
 
 Tree_node* Tree_node_init(Tree_node* new, int val, int frequency) {
     new -> val = val;
@@ -198,3 +200,70 @@ void list_clean(list_node *head) {
         head = next_node;
     }
 }
+
+
+int get_one_decode_result(FILE* file, int *number_of_bits, int *bit_index, int *loop_indicator, int *get_result, Tree_node *recover_root) {
+    char true_result = (char) *get_result;
+    Tree_node* temp_root = recover_root;
+    while (1) {
+        if (!(*bit_index < *loop_indicator)) {
+            // if (minus_flag) {
+            //     *number_of_bits = *number_of_bits - 8;
+            // }
+            if ((*get_result = fgetc(file)) != EOF) {
+                true_result = (char) *get_result;
+                *loop_indicator = (*number_of_bits <= 8) ? *number_of_bits : 8;
+                *bit_index = 0;
+                *number_of_bits = *number_of_bits - 8;
+            } else {
+                return -1;
+            }
+        }
+        // minus_flag = TRUE;
+        while (*bit_index < *loop_indicator) {
+            if (check_target_binary(&true_result, *bit_index)) {
+                temp_root = temp_root -> right;
+                // printf("1 ");
+            } else {
+                temp_root = temp_root -> left;
+                // printf("0 ");
+            }
+            if (!temp_root -> left && !temp_root -> right) {
+                
+                // printf("value: %d ", temp_root -> val);
+                // fwrite(&recover_char, sizeof(char), 1, file_recovery);
+                
+                *bit_index = *bit_index + 1;
+                return (int)temp_root -> val;
+                
+            }
+            *bit_index = *bit_index + 1;
+        }
+    }
+    return -1;
+}
+
+void prefix_table(char pattern[], int prefix[], int n) {
+    prefix[0] = 0;
+    int len = 0;
+    int i = 1;
+    while(i < n) {
+        if (pattern[i] == pattern[len]) {
+            len++;
+            prefix[i] = len;
+            i++;
+        } else {
+            if (len > 0) {
+                len = prefix[len - 1];
+            } else {
+                prefix[i] = len;
+                i++;
+            }
+        }
+    }
+    for (i = n - 1; i > 0; i--) {
+        prefix[i] = prefix[i - 1];
+    }
+    prefix[0] = -1;
+}
+
