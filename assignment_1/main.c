@@ -24,15 +24,18 @@ int main(int argc, char * const argv[]) {
 
     while ((c = getopt(argc, argv, "e:d:s:")) != -1) {
         switch (c) {
+            // run encode function
             case 'e':
                 encode_function(argv[2], argv[3]);
                 break;
+
+            // run decode function
             case 'd':
-                // printf("find is d, argv is %s\n", optarg);
                 decode_function(argv[2], argv[3]);
                 break;
+
+            // run search pattern function
             case 's':
-                // printf("find is s, argv is %s and %s\n", argv[2], argv[3]);
                 search_function(argv[2], argv[3]);
                 break;
             default: printf("input errot!\n");
@@ -45,9 +48,8 @@ int main(int argc, char * const argv[]) {
 
 
 void encode_function(const char* input_file, const char* output_file) {
-        
-    // const char file_pwd[] = "/Users/wujian/Downloads/CSE_Course/18s2/COMP9319/assignment_1/assignment_1/test3.txt";
-//    const char file_pwd[] = "/import/adams/3/z5103624/COMP9319/assignment1/test1.txt";
+    
+    
     FILE *file = fopen(input_file, "r");
     int get_result;
     int distinct_num = 0;
@@ -202,9 +204,9 @@ void decode_function(const char* input_file, const char* output_file) {
     printf("Decode: construct tree: \n");
     while (interator < input[0]) {
         Tree_node *new_node = malloc(sizeof(Tree_node));
-        if (header_information[interator] == 0 && header_information[interator+1] == 1) {
-            Tree_node_init(new_node, header_information[interator+2], 0);
-            printf("node is %d\n", header_information[interator+2]);
+        if (header_information[interator] == 1) {
+            Tree_node_init(new_node, header_information[interator+1], 0);
+            // printf("node is %d\n", header_information[interator+1]);
             if (should_be_right) {
                 temp_root -> right = new_node;
             } else {
@@ -214,7 +216,7 @@ void decode_function(const char* input_file, const char* output_file) {
             temp_root = new_node;
             temp_root = back_trace(temp_root);
             should_be_right = TRUE;
-            interator = interator + 3;
+            interator = interator + 2;
         } else {
             Tree_node_init(new_node, -1, 0);
             if (should_be_right) {
@@ -248,7 +250,7 @@ void decode_function(const char* input_file, const char* output_file) {
     char recover_char = '\0';
     temp_root = recover_root;
     fseek(file, 1024, SEEK_SET);
-    printf("Decode: recover code result:\n");
+    // printf("Decode: recover code result:\n");
     while ((get_result = fgetc(file)) != EOF) {
         char true_result = (char) get_result;
         bit_index = 0;
@@ -256,14 +258,14 @@ void decode_function(const char* input_file, const char* output_file) {
         while (bit_index < loop_indicator) {
             if (check_target_binary(&true_result, bit_index)) {
                 temp_root = temp_root -> right;
-                printf("1 ");
+                // printf("1 ");
             } else {
                 temp_root = temp_root -> left;
-                printf("0 ");
+                // printf("0 ");
             }
             if (!temp_root -> left && !temp_root -> right) {
                 recover_char = temp_root -> val;
-                printf("value: %d ", temp_root -> val);
+                // printf("value: %d ", temp_root -> val);
                 fwrite(&recover_char, sizeof(char), 1, file_recovery);
                 temp_root = recover_root;
             }
@@ -271,7 +273,7 @@ void decode_function(const char* input_file, const char* output_file) {
         }
         number_of_bits = number_of_bits - 8;
     }
-    printf("\n");
+    // printf("\n");
 }
 
 
@@ -299,9 +301,9 @@ void search_function(const char* pattern, const char* input_file) {
     printf("Decode: construct tree: \n");
     while (interator < input[0]) {
         Tree_node *new_node = malloc(sizeof(Tree_node));
-        if (header_information[interator] == 0 && header_information[interator+1] == 1) {
-            Tree_node_init(new_node, header_information[interator+2], 0);
-            printf("node is %d\n", header_information[interator+2]);
+        if (header_information[interator] == 1) {
+            Tree_node_init(new_node, header_information[interator+1], 0);
+            // printf("node is %d\n", header_information[interator+2]);
             if (should_be_right) {
                 temp_root -> right = new_node;
             } else {
@@ -311,7 +313,7 @@ void search_function(const char* pattern, const char* input_file) {
             temp_root = new_node;
             temp_root = back_trace(temp_root);
             should_be_right = TRUE;
-            interator = interator + 3;
+            interator = interator + 2;
         } else {
             Tree_node_init(new_node, -1, 0);
             if (should_be_right) {
