@@ -19,7 +19,7 @@ void encode_function(const char* input_file, const char* output_file);
 void decode_function(const char* input_file, const char* output_file);
 void search_function(const char* pattern, const char* input_file);
 
-int main(int argc, const char * argv[]) {
+int main(int argc, char * const argv[]) {
     int c;
 
     while ((c = getopt(argc, argv, "e:d:s:")) != -1) {
@@ -38,7 +38,7 @@ int main(int argc, const char * argv[]) {
             default: printf("input errot!\n");
         }
     }
-
+    return 0;
 }
 
 
@@ -51,7 +51,7 @@ void encode_function(const char* input_file, const char* output_file) {
     FILE *file = fopen(input_file, "r");
     int get_result;
     int distinct_num = 0;
-    int frequence[127] = {0};
+    int frequence[256] = {0};
     int i;
     // open file
     while ((get_result = fgetc(file)) != EOF) {
@@ -65,13 +65,18 @@ void encode_function(const char* input_file, const char* output_file) {
     // init linked list head
     list_node *head = construct_linked_list(frequence);
     // list_print(head);
+    // list_node *temp_head = head;
+    // while (temp_head) {
+    //     printf("list val is %d, frequency is %d\n", temp_head -> name, temp_head -> frequency);
+    //     temp_head = temp_head -> next;
+    // }
     
     // construct huffman tree
     Tree_node *root = construct_huffman(head);
 
     // with pointer points the corresponding tree node
-    struct code_information* code_list = malloc(128 * sizeof(struct code_information));
-    memset(code_list, 0, 128 * sizeof(struct code_information));
+    struct code_information* code_list = malloc(256 * sizeof(struct code_information));
+    memset(code_list, 0, 256* sizeof(struct code_information));
 
     int total_bit = 0;  // the number of encode bit
 
@@ -83,9 +88,11 @@ void encode_function(const char* input_file, const char* output_file) {
     printf("Encode: header tree information:\n");
     DFS(root, code_list, &total_bit, &header);
     printf("\n");
+    
+    
 
     printf("Encode: each char encode result:\n");
-    for (i = 0; i < 128; i++) {
+    for (i = 0; i < 256; i++) {
         if (code_list[i].exist_or_not) {
             printf("%d code is ", i);
             char_print(code_list[i].code -> code, 0);
@@ -99,10 +106,12 @@ void encode_function(const char* input_file, const char* output_file) {
     
 //    start encode
     int number_of_bytes_needed = total_bit / 8 + 1;
-    if (!number_of_bytes_needed % 8) {
+    if (!(total_bit % 8)) {
         number_of_bytes_needed--;
     }
-    // printf("number of bytes is %d\n", number_of_bytes_needed);
+    // printf("Encode: number_of_bytes_needed \% 8 is %d\n", number_of_bytes_needed % 8);
+    printf("Encode: total bits is %d\n", total_bit);
+    printf("Encode: number of bytes is %d\n", number_of_bytes_needed);
     
     
     
@@ -130,16 +139,17 @@ void encode_function(const char* input_file, const char* output_file) {
     }
     fclose(file);
     
-    printf("Encode: encode result is:\n");
-    for (int i = 0; i < total_bit; i++) {
-        // char_print(encode_result, i/8);
-        if (check_target_binary(encode_result, i)) {
-            printf("1 ");
-        } else {
-            printf("0 ");
-        }
-    }
-    printf("\n");
+    // printf("Encode: encode result is:\n");
+    // for (i = 0; i < total_bit; i++) {
+    //     // char_print(encode_result, i/8);
+    //     if (check_target_binary(encode_result, i)) {
+    //         printf("1 ");
+    //     } else {
+    //         printf("0 ");
+    //     }
+    // }
+    // printf("\n");
+
     // Output_file output_file;
     // output_file.encode_result = encode_result;
     // output_file.header = header;

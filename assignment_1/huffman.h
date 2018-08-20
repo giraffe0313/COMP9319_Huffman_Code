@@ -19,7 +19,7 @@ typedef struct _Tree_node {
     int val;
     int position;
     int depth;
-    char code[16];
+    char code[32];
     struct _Tree_node *left;
     struct _Tree_node *right;
     struct _Tree_node *parent;
@@ -69,6 +69,6 @@ void list_clean(list_node *head);
 int get_one_decode_result(FILE* file, int *number_of_bits, int *bit_index, int *loop_indicator, int *get_result, Tree_node *recover_root);
 
 // kmp function
-void prefix_table(char pattern[], int prefix[], int n);
+void prefix_table(const char pattern[], int prefix[], int n);
 
 #endif /* huffman_h */

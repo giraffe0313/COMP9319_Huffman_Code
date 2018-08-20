@@ -17,7 +17,7 @@ Tree_node* Tree_node_init(Tree_node* new, int val, int frequency) {
     new -> right = NULL;
     new -> parent = NULL;
     new -> depth = 0;
-    memset(new -> code, 0, 16);
+    memset(new -> code, 0, 32);
     new -> position = 0;
     return new;
 }
@@ -29,7 +29,7 @@ list_node *construct_linked_list(int *frequence) {
     head -> frequency = 0;
     
     // counting frequency and construct linked list
-    for (i = 0; i < 127; i++) {
+    for (i = 0; i < 256; i++) {
         if (frequence[i]) {
             Tree_node *new = malloc(sizeof(Tree_node));
             new = Tree_node_init(new, i, frequence[i]);
@@ -69,17 +69,17 @@ void DFS(Tree_node *root, struct code_information* code_list, int *total_bit, He
     // reach leaf node
     if ((!root -> left) && (!root -> right)) {
         // printf("%c: %d\n", root -> val, root -> code[0]);
-//        printf("\n%d: depth is %d, frequency is %d, code is ",root -> val, root -> depth, root -> frequency);
+        // printf("\n%d: depth is %d, frequency is %d",root -> val, root -> depth, root -> frequency);
 //        char_print(&(root -> code[0]), 0);
-//        printf("\n");
+        // printf("\n");
         code_list[root -> val].exist_or_not = 1;
         code_list[root -> val].code = root;
         *total_bit = *total_bit + (root -> frequency) * (root -> depth);
 //        printf("total bit: %d\n", *total_bit);
         printf("1 %d ", root -> val);
-        header -> bitarray[header -> length] = 1;
-        header -> bitarray[header -> length + 1] = root -> val;
-        header -> length = header -> length + 2;
+        header -> bitarray[header -> length - 1] = 1;
+        header -> bitarray[header -> length] = root -> val;
+        header -> length = header -> length + 1;
 
         return;
     }
@@ -92,7 +92,7 @@ void DFS(Tree_node *root, struct code_information* code_list, int *total_bit, He
         root -> left -> depth = root -> depth + 1;
         
         int i;
-        for (i = 0; i < 16; i++) {
+        for (i = 0; i < 32; i++) {
             root -> left -> code[i] = root -> code[i];
         }
         
@@ -107,7 +107,7 @@ void DFS(Tree_node *root, struct code_information* code_list, int *total_bit, He
 
         root -> right -> depth = root -> depth + 1;
         int i;
-        for (i = 0; i < 16; i++) {
+        for (i = 0; i < 32; i++) {
             root -> right -> code[i] = root -> code[i];
         }
         add_bit(root -> right -> code, root -> depth);
@@ -170,6 +170,10 @@ list_node *list_insert_node(list_node *head, int name, int frequency, Tree_node 
     new_node -> frequency = frequency;
     new_node -> tree_node = tree_node;
     new_node -> next = NULL;
+    if (new_node -> frequency < head -> frequency) {
+        new_node -> next = head;
+        return new_node;
+    }
     int flag = 0;
     while (temp -> next != NULL) {
         if (frequency < temp -> next -> frequency) {
@@ -245,7 +249,7 @@ int get_one_decode_result(FILE* file, int *number_of_bits, int *bit_index, int *
     return -1;
 }
 
-void prefix_table(char pattern[], int prefix[], int n) {
+void prefix_table(const char pattern[], int prefix[], int n) {
     prefix[0] = 0;
     int len = 0;
     int i = 1;
